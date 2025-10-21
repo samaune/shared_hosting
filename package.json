@@ -1,0 +1,22 @@
+{
+  "name": "singha",
+  "version": "1.0.0",
+  "description": "/etc/apache2/ ├── apache2.conf          ← Main global config ├── conf-available/       ← Optional config snippets │   └── security.conf ├── conf-enabled/         ← Enabled configs (symlinks) ├── envvars               ← Environment variables ├── magic                 ← MIME type detection rules ├── mods-available/       ← All modules ├── mods-enabled/         ← Active modules (symlinks) ├── ports.conf            ← Port listening settings ├── sites-available/      ← Virtual host definitions ├── sites-enabled/        ← Active virtual hosts (symlinks)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samaune/shared_hosting.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samaune/shared_hosting/issues"
+  },
+  "homepage": "https://github.com/samaune/shared_hosting#readme",
+  "dependencies": {
+    "ui-extjs": "^7.0.0"
+  }
+}
