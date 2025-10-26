@@ -117,8 +117,6 @@
 </head>
 <body>
     <h1>Data Binding Example</h1>
-    <p>This example expands upon the <a href="./kitchensink/?classic#xml-grid">XML Grid example</a> and shows how to implement data binding for a master-detail view.</p>
-    <p>Note that the js is not minified so it is readable. See <a href="binding.js">binding.js</a>.</p>
     <div id="binding-example"></div>
 </body>
 </html>
