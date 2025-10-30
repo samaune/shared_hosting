@@ -11,16 +11,16 @@ To maintain clean, predictable, and auditable CI/CD pipelines — ensuring:
 
 ## 1. Git Branch
 
-| Branch        | Purpose                                                    | Environment           | Deployment Trigger                        | Access Level            |
-| ------------- | -----------------------------------------------------------| --------------------- | ----------------------------------------- | ----------------------- |
-| **`master`**  | Active development branch; feature integration and testing | **Development (DEV)** | On merge or push                          | Vendors                 |
-| **`staging`** | Pre-production verification and validation                 | **Staging (STG/UAT)** | On merge from `master`                    | IR, Vendors             |
-| **`prod`**    | Production-ready, stable releases only                     | **Production (PROD)** | On merge from `staging` (manual approval) | IR, IHA                 |
+| Branch        | Purpose                                                    | Environment           | Deployment Trigger                        | Access Level |
+| ------------- | ---------------------------------------------------------- | --------------------- | ----------------------------------------- | ------------ |
+| **`master`**  | Active development branch; feature integration and testing | **Development (DEV)** | N/A                                       | Vendors      |
+| **`staging`** | Pre-production verification and validation                 | **Staging (STG/UAT)** | On merge or push                          | IR, Vendors  |
+| **`prod`**    | Production-ready, stable releases only                     | **Production (PROD)** | On merge from `staging` (manual approval) | IR, IHA      |
 
 
 ---
 
-## 2. 🔄 Workflow Process
+## 2. Workflow Process
 
 ### 2.1 Feature Development
 
@@ -30,7 +30,7 @@ feature/*  --->  master  --->  staging  --->  prod
 
 ```
 
-* Vendors create feature branches from `master`:
+* Developers create feature branches from `master`:
 
   ```bash
   git checkout master
@@ -47,48 +47,33 @@ feature/*  --->  master  --->  staging  --->  prod
 
 ---
 
-### 2.2 Merge to `master` (Development Integration)
+### 2.2 Release to `staging` 
 
-* **Purpose:** Integrate new features for DEV environment testing.
-* **Responsible:** Vendors + CI/CD automation.
-* **Actions:**
+Create a **Merge Request** from `master` → `staging`.
+to integrate code in a UAT/Staging environment before production.
 
-  * After PR approval, merge to `master`.
-  * CI pipeline automatically deploys to **DEV** environment.
-  * Automated tests and smoke checks are triggered.
-
----
-
-### 2.3 Promote to `staging`
-
-* **Purpose:** Test integrated code in a UAT/Staging environment before production.
-* **Responsible:** DevOps + QA.
-* **Actions:**
-
-  1. Create PR from `master` → `staging`.
+* Peer review required.
+* CI builds and tests must pass.
+* Merge when approved.
 
      ```bash
      git checkout staging
      git merge master
      git push origin staging
      ```
-  2. CI/CD pipeline deploys automatically to **STAGING**.
-  3. QA performs:
+     
+→ On merge:
 
-     * Functional testing
-     * Regression testing
-     * Integration testing
-  4. QA signs off for production release.
-
-**Promotion condition:** QA approval required.
+* CI pipeline will trigger automatically after merged and pushed
+* Docker container registry images tagged as `:staging-$commit_id`.
+* Scheduling deployment to the **Staging environment**, everyday at 11am,5pm and 12am
 
 ---
 
-### 2.4 Promote to `prod`
+### 2.3 Release to `prod`
 
-* **Purpose:** Deploy stable, tested code to the production environment.
-* **Responsible:** DevOps + Release Manager.
-* **Actions:**
+Create a **Merge Request** from `staging` → `prod`.
+to integrate code in a UAT/Staging environment before production.
 
   1. Create PR from `staging` → `prod`.
 
@@ -99,41 +84,18 @@ feature/*  --->  master  --->  staging  --->  prod
      ```
   2. CI/CD pipeline deploys automatically to **PRODUCTION**.
   3. Post-deployment validation (smoke tests, monitoring).
-  4. Tag release version:
-
-     ```bash
-     git tag -a vX.Y.Z -m "Release version X.Y.Z"
-     git push origin vX.Y.Z
-     ```
-
-**Promotion condition:** QA sign-off + Release approval.
-
+  
 ---
 
 ## 3. 👥 Roles and Responsibilities
 
-| Role                            | Responsibilities                                                                                                                                                |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vendors**                  | - Create feature branches<br>- Implement and test code locally<br>- Submit PRs to `master`<br>- Fix issues from code review or pipeline failures                |
-| **QA Engineers**                | - Validate code on `staging`<br>- Perform regression and acceptance tests<br>- Approve for production deployment                                                |
-| **DevOps Engineers**            | - Manage CI/CD pipelines<br>- Automate deployments for each branch<br>- Ensure rollback procedures are in place<br>- Maintain GitOps manifests (Helm/Kustomize) |
-| **Release Manager / Tech Lead** | - Approve merges to `prod`<br>- Review release notes and tags<br>- Ensure compliance and audit trails<br>- Coordinate rollback if necessary                     |
+| Role                     | Responsibilities                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vendors - Developers** | - Create feature branches<br>- Implement and test code locally<br>- Submit MRs to `prod` branch<br>- Fix issues from code review or pipeline failures |
+| **IR QA**                | - Verify change on `staging`<br>- Perform regression and acceptance tests<br>- Approve for production deployment                                      |
+| **Inhouse Developers**   | - Manage CI/CD pipelines<br>- Scheduling deployments for each branch<br>- Ensure rollback procedures are in place<br>- Maintain GitOps manifests      |
 
----
-
-## 4. ⚙️ CI/CD and GitOps Integration
-
-Each branch triggers automated deployment to its target environment through GitOps controllers (e.g., **ArgoCD**, **Flux**, or **Jenkins X**).
-
-| Branch    | Target Environment | Deployment Trigger             |
-| --------- | ------------------ | ------------------------------ |
-| `master`  | DEV                | Auto on merge                  |
-| `staging` | STAGING            | Auto on merge                  |
-| `prod`    | PROD               | Manual approval or tag trigger |
-
----
-
-## 5. 🚨 Rollback Procedure
+## 4. Rollback Procedure
 
 1. Identify failed deployment via monitoring/logs.
 2. Rollback using GitOps revert:
@@ -147,7 +109,7 @@ Each branch triggers automated deployment to its target environment through GitO
 
 ---
 
-## 6. 📦 Versioning & Tag Policy
+## 6. Versioning & Tag Policy
 
 * Follow **Semantic Versioning**: `vMAJOR.MINOR.PATCH`
 * Tags applied only on the **prod** branch.
@@ -159,14 +121,5 @@ Each branch triggers automated deployment to its target environment through GitO
   v1.1.1 – Bugfix
   ```
 
----
-
-## 7. ✅ Approval Workflow Summary
-
-| Step | Branch             | Required Approval       | Deployed To |
-| ---- | ------------------ | ----------------------- | ----------- |
-| 1    | `feature → master` | Vendor + Peer Review | DEV         |
-| 2    | `master → staging` | DevOps + QA             | STAGING     |
-| 3    | `staging → prod`   | QA + Release Manager    | PROD        |
 
 ---
